@@ -6,6 +6,8 @@ class Artigo:
     ano: int
     titulo: str
     doi: str | None
+    score: float = 0.0
+    citacoes: int = 0
 
 
 @dataclass

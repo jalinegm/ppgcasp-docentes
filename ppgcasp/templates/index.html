@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block corpo %}
+<header class="topo">
+  <div class="miolo">
+    <p class="eyebrow rise">Mestrado Profissional · Instituto Federal Farroupilha</p>
+    <h1 class="rise" style="animation-delay:.08s">Ciências Ambientais e Sistemas Produtivos</h1>
+    <div class="kpis">
+      <div class="kpi rise" style="animation-delay:.2s"><b data-n="{{ kpis.docentes }}">{{ kpis.docentes }}</b><span>docentes</span></div>
+      <div class="kpi rise" style="animation-delay:.28s"><b data-n="{{ kpis.artigos }}">{{ kpis.artigos }}</b><span>artigos 2021–2025</span></div>
+      <div class="kpi rise" style="animation-delay:.36s"><b data-n="{{ kpis.doi }}">{{ kpis.doi }}</b><span>com DOI</span></div>
+      <div class="kpi rise" style="animation-delay:.44s"><b data-n="{{ kpis.linhas }}">{{ kpis.linhas }}</b><span>linhas de pesquisa</span></div>
+    </div>
+  </div>
+</header>
+<main class="miolo">
+{% if grupo.disponivel and grupo.altmetric_score > 0 %}
+  <section class="sec">
+    <h2>Impacto social</h2>
+    <p class="lead">Onde a pesquisa do grupo foi citada e compartilhada.</p>
+    <div class="impacto">
+      <div class="cartao"><span class="rot">Citações</span><b>{{ grupo.citacoes }}</b></div>
+      <div class="cartao"><span class="rot">Atenção Altmetric</span><b>{{ grupo.altmetric_score|round|int }}</b></div>
+      {% if grupo.noticias %}<div class="cartao"><span class="rot">Notícias</span><b>{{ grupo.noticias }}</b></div>{% endif %}
+      {% if grupo.politicas %}<div class="cartao"><span class="rot">Políticas públicas</span><b>{{ grupo.politicas }}</b></div>{% endif %}
+    </div>
+    {% if destaques %}
+    <h3 class="sub">Artigos com maior repercussão</h3>
+    <ol class="destaques">
+      {% for d, a in destaques %}
+      <li class="cartao"><a href="docentes/{{ d.slug }}.html">{{ a.titulo }}</a><span>{{ d.nome }} · {{ a.ano }}</span></li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+  </section>
+{% endif %}
+{% for titulo_linha, lista in por_linha %}
+  <section class="sec">
+    <div class="linha-cab"><h2>{{ titulo_linha }}</h2><span>{{ lista|length|plural("docente", "docentes") }}</span></div>
+    <div class="grade">
+      {% for d in lista %}
+      <a class="doc rise" style="animation-delay:{{ (loop.index0 * 0.05 + 0.3)|round(2) }}s" href="docentes/{{ d.slug }}.html">
+        {% if tem_foto[d.slug] %}<img class="foto" src="fotos/{{ d.slug }}.jpg" alt="Foto de {{ d.nome }}">{% else %}<span class="foto">{{ iniciais(d.nome) }}</span>{% endif %}
+        <h3>{{ d.nome }}</h3>
+        {% if d.artigos %}<p>{{ d.artigos|length|plural("artigo", "artigos") }}{% set n = d.artigos|selectattr("doi")|list|length %}{% if n %} · {{ n }} com DOI{% endif %}</p>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+</main>
+{% endblock %}

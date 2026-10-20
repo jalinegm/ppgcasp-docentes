@@ -53,8 +53,13 @@ def buscar_impacto_doi(doi: str, cache: dict, get=requests.get, pausa: float = 1
 
 
 def somar_impacto(docente: Docente, cache: dict, get=requests.get, pausa: float = 1.0) -> Impacto:
-    dois = [a.doi for a in docente.artigos if a.doi]
-    resultados = [buscar_impacto_doi(d, cache, get=get, pausa=pausa) for d in dois]
+    resultados = []
+    for artigo in docente.artigos:
+        if not artigo.doi:
+            continue
+        r = buscar_impacto_doi(artigo.doi, cache, get=get, pausa=pausa)
+        artigo.score, artigo.citacoes = float(r["score"]), r["citacoes"]
+        resultados.append(r)
     return Impacto(
         citacoes=sum(r["citacoes"] for r in resultados),
         altmetric_score=float(sum(r["score"] for r in resultados)),

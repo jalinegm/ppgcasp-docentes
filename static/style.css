@@ -1,0 +1,64 @@
+:root{--lime:#9EEA6C;--verde:#58C411;--escuro:#244C4E;--contorno:#337D63;--texto:#4C5267;--fundo:#E2E7F1;--cartao:#fff;--borda:#d5dbe8;
+  --sombra-hover:0 8px 24px rgba(36,76,78,.14)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fundo);color:var(--texto);font-family:"Inter Tight",sans-serif;font-weight:500;font-size:17px;line-height:1.7}
+h1,h2,h3{font-family:Fustat,sans-serif;font-weight:600;letter-spacing:-.03em;color:var(--escuro);margin:0}
+a{color:inherit}
+.miolo{max-width:1200px;margin:0 auto;padding:0 24px}
+.topo{background:var(--escuro);color:#d7e3e0;padding:48px 0 40px}
+.eyebrow{margin:0;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--lime)}
+.topo h1{color:#fff;font-size:clamp(34px,6vw,58px);line-height:1.05;margin:12px 0 0;max-width:20ch}
+.voltar{color:var(--lime);font-size:14px;font-weight:600;text-decoration:none}
+.voltar:hover{text-decoration:underline}
+.cabeca{display:flex;gap:28px;align-items:center;margin-top:20px}
+.cabeca h1{font-size:clamp(30px,5vw,46px);margin:6px 0 8px}
+.resumo{margin:0;max-width:70ch;font-size:16px}
+.foto{width:96px;height:96px;border-radius:50%;background:var(--fundo);display:grid;place-items:center;font-family:Fustat,sans-serif;font-weight:600;color:var(--contorno);font-size:28px;object-fit:cover;flex:none}
+.foto.grande{width:128px;height:128px;font-size:40px;background:#2f5d5f;color:var(--lime)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:32px}
+.kpi{border-top:1px solid rgba(255,255,255,.25);padding-top:12px}
+.kpi b{display:block;font-family:Fustat,sans-serif;font-size:40px;line-height:1.1;color:var(--lime);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.kpi span{font-size:14px}
+.sec{padding:40px 0 8px}
+.sec h2{font-size:28px;margin-bottom:8px}
+.lead{margin:0 0 24px;max-width:60ch}
+.sub{font-size:20px;margin:28px 0 12px}
+.linha-cab{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px;border-bottom:1px solid #c9d1e0;padding-bottom:8px}
+.linha-cab h2{margin:0;font-size:24px}
+.linha-cab span{font-size:14px;white-space:nowrap}
+.grade{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.doc{display:block;background:var(--cartao);border:1px solid var(--borda);border-radius:16px;padding:24px;text-decoration:none;transition:transform .25s,box-shadow .25s}
+.doc:hover,.doc:focus-visible{transform:translateY(-4px);box-shadow:var(--sombra-hover)}
+.doc:focus-visible{outline:3px solid var(--escuro);outline-offset:2px}
+.doc .foto{margin-bottom:12px;width:72px;height:72px;font-size:22px}
+.doc h3{font-size:18px;line-height:1.25;margin-bottom:4px}
+.doc p{margin:0;font-size:14px}
+.impacto,.lts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.cartao{background:var(--cartao);border:1px solid var(--borda);border-radius:16px;padding:24px}
+.cartao b{display:block;font-family:Fustat,sans-serif;font-size:32px;color:var(--escuro);letter-spacing:-.03em}
+.cartao .rot,.cartao span{font-size:14px}
+.destaques{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.destaques li{display:flex;flex-direction:column;gap:2px}
+.destaques a{color:var(--escuro);font-weight:600;text-decoration:none}
+.destaques a:hover{text-decoration:underline}
+.ano{font-size:20px;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid #c9d1e0}
+.pub{display:grid;grid-template-columns:120px 1fr;gap:20px;align-items:center;background:var(--cartao);border:1px solid var(--borda);border-radius:16px;padding:16px 20px;margin-bottom:10px;transition:transform .25s,box-shadow .25s}
+.pub:hover{transform:translateY(-2px);box-shadow:var(--sombra-hover)}
+.selos{display:flex;gap:8px;align-items:center;min-height:64px}
+.titulo{margin:0 0 4px;color:var(--escuro);font-weight:600;font-size:16px;line-height:1.4}
+.doi{font-size:14px;color:var(--contorno);word-break:break-all}
+.sem-doi{font-size:13px;font-weight:600;border:1px dashed #9aa5ba;border-radius:999px;padding:4px 10px}
+.rise{opacity:0;transform:translateY(12px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+main.miolo{padding-bottom:64px}
+@media (max-width:960px){.grade{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){
+  .grade{grid-template-columns:1fr}
+  .cabeca{flex-direction:column;align-items:flex-start}
+  .pub{grid-template-columns:1fr}
+  .selos{min-height:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .rise{animation:none;opacity:1;transform:none}
+  .doc,.pub{transition:none}
+}

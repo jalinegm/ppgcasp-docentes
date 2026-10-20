@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block titulo %}{{ d.nome }} · Ciências Ambientais e Sistemas Produtivos{% endblock %}
+{% block corpo %}
+<header class="topo">
+  <div class="miolo">
+    <a class="voltar" href="{{ raiz }}index.html">← Corpo docente</a>
+    <div class="cabeca">
+      {% if foto %}<img class="foto grande" src="{{ raiz }}fotos/{{ d.slug }}.jpg" alt="Foto de {{ d.nome }}">{% else %}<span class="foto grande">{{ iniciais }}</span>{% endif %}
+      <div>
+        <p class="eyebrow">{{ linha }}{% if d.lattes and d.lattes.campus %} · Campus {{ d.lattes.campus }}{% endif %}</p>
+        <h1>{{ d.nome }}</h1>
+        {% if d.lattes and d.lattes.resumo %}<p class="resumo">{{ d.lattes.resumo }}</p>{% endif %}
+      </div>
+    </div>
+    {% if d.artigos %}
+    <div class="kpis">
+      <div class="kpi"><b data-n="{{ d.artigos|length }}">{{ d.artigos|length }}</b><span>artigos 2021–2025</span></div>
+      {% if com_doi %}<div class="kpi"><b data-n="{{ com_doi }}">{{ com_doi }}</b><span>com DOI</span></div>{% endif %}
+      {% if d.impacto and d.impacto.citacoes %}<div class="kpi"><b data-n="{{ d.impacto.citacoes }}">{{ d.impacto.citacoes }}</b><span>citações (Dimensions)</span></div>{% endif %}
+      {% if d.impacto and d.impacto.altmetric_score > 0 %}<div class="kpi"><b data-n="{{ d.impacto.altmetric_score|round|int }}">{{ d.impacto.altmetric_score|round|int }}</b><span>atenção Altmetric</span></div>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</header>
+<main class="miolo">
+{% if cartoes %}
+  <section class="sec">
+    <h2>Além dos artigos</h2>
+    <p class="lead">Produção técnica, formação e divulgação registradas no Lattes (2021–2025).</p>
+    <div class="lts">
+      {% for n, rotulo in cartoes %}<div class="cartao"><b>{{ n }}</b><span>{{ rotulo }}</span></div>{% endfor %}
+    </div>
+  </section>
+{% endif %}
+{% if anos %}
+  <section class="sec">
+    <h2>Artigos</h2>
+    {% for ano, lista in anos %}
+    <h3 class="ano">{{ ano }}</h3>
+    {% for a in lista %}
+    <article class="pub">
+      <div class="selos">
+        {% if a.doi %}
+        <div class="altmetric-embed" data-badge-type="donut" data-badge-popover="right" data-doi="{{ a.doi }}"></div>
+        <span class="__dimensions_badge_embed__" data-doi="{{ a.doi }}" data-style="small_circle"></span>
+        {% else %}<span class="sem-doi">sem DOI</span>{% endif %}
+      </div>
+      <div>
+        <p class="titulo">{{ a.titulo }}</p>
+        {% if a.doi %}<a class="doi" href="https://doi.org/{{ a.doi }}" target="_blank" rel="noopener">doi.org/{{ a.doi }}</a>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+    {% endfor %}
+  </section>
+{% endif %}
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+<script async src="https://badge.dimensions.ai/badge.js" charset="utf-8"></script>
+{% endblock %}

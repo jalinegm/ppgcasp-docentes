@@ -80,3 +80,11 @@ def test_cache_roundtrip(tmp_path):
     assert carregar_cache(p) == {}
     salvar_cache(p, {"10.1/a": {"ok": True}})
     assert carregar_cache(p) == {"10.1/a": {"ok": True}}
+
+
+def test_somar_impacto_guarda_por_artigo():
+    a = Artigo(2024, "a", "10.1/a")
+    d = Docente("X", "x", 1, [a])
+    get = get_falso(Resp(200, {"score": 9}), Resp(200, {"times_cited": 4}))
+    somar_impacto(d, {}, get=get, pausa=0)
+    assert (a.score, a.citacoes) == (9.0, 4)
