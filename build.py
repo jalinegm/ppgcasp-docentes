@@ -6,6 +6,7 @@ import requests
 
 from ppgcasp.impacto import carregar_cache, salvar_cache, somar_grupo, somar_impacto
 from ppgcasp.lattes import carregar_lattes
+from ppgcasp.models import chave_artigo
 from ppgcasp.planilha import carregar_docentes
 from ppgcasp.render import renderizar_site
 
@@ -41,7 +42,7 @@ def main(argv: list[str] | None = None) -> int:
 
     renderizar_site(docentes, grupo, args.saida, fotos=args.fotos)
 
-    artigos = [a for d in docentes for a in d.artigos]
+    artigos = list({chave_artigo(a): a for d in docentes for a in d.artigos}.values())
     sem_retorno = sum(1 for a in artigos if a.doi and a.doi not in cache)
     print(f"{len(docentes)} docentes · {len(artigos)} artigos · "
           f"{sum(1 for a in artigos if a.doi)} com DOI · {sem_retorno} DOI sem dados de impacto")
