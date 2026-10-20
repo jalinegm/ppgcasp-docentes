@@ -88,3 +88,10 @@ def test_somar_impacto_guarda_por_artigo():
     get = get_falso(Resp(200, {"score": 9}), Resp(200, {"times_cited": 4}))
     somar_impacto(d, {}, get=get, pausa=0)
     assert (a.score, a.citacoes) == (9.0, 4)
+
+
+def test_altmetric_usa_chave_do_ambiente(monkeypatch):
+    monkeypatch.setenv("ALTMETRIC_API_KEY", "abc123")
+    chamadas = []
+    buscar_impacto_doi("10.1/a", {}, get=get_falso(Resp(404), Resp(404), chamadas), pausa=0)
+    assert any("altmetric" in u and "key=abc123" in u for u in chamadas)

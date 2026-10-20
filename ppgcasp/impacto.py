@@ -1,4 +1,5 @@
 import json
+import os
 import time
 from pathlib import Path
 
@@ -37,7 +38,10 @@ def _consultar(get, url: str, tentativas: int = 2):
 def buscar_impacto_doi(doi: str, cache: dict, get=requests.get, pausa: float = 1.0) -> dict:
     if doi in cache:
         return cache[doi]
-    st_alt, alt = _consultar(get, ALTMETRIC.format(doi=doi))
+    url_alt = ALTMETRIC.format(doi=doi)
+    if os.environ.get("ALTMETRIC_API_KEY"):
+        url_alt += f"?key={os.environ['ALTMETRIC_API_KEY']}"
+    st_alt, alt = _consultar(get, url_alt)
     st_dim, dim = _consultar(get, DIMENSIONS.format(doi=doi))
     resultado = {
         "citacoes": int(dim.get("times_cited") or 0),
