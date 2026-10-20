@@ -5,7 +5,7 @@ from pathlib import Path
 
 import requests
 
-from .models import Docente, Impacto
+from .models import Docente, Impacto, chave_artigo
 
 ALTMETRIC = "https://api.altmetric.com/v1/doi/{doi}"
 DIMENSIONS = "https://metrics-api.dimensions.ai/doi/{doi}"
@@ -36,8 +36,11 @@ def _consultar(get, url: str, tentativas: int = 2):
 
 
 def buscar_impacto_doi(doi: str, cache: dict, get=requests.get, pausa: float = 1.0) -> dict:
-    if doi in cache:
-        return cache[doi]
+    guardado = cache.get(doi)
+    if guardado and guardado.get("dim_ok", True) and (
+        guardado.get("alt_ok", True) or not os.environ.get("ALTMETRIC_API_KEY")
+    ):
+        return guardado
     url_alt = ALTMETRIC.format(doi=doi)
     if os.environ.get("ALTMETRIC_API_KEY"):
         url_alt += f"?key={os.environ['ALTMETRIC_API_KEY']}"
@@ -48,8 +51,10 @@ def buscar_impacto_doi(doi: str, cache: dict, get=requests.get, pausa: float = 1
         "score": float(alt.get("score") or 0) if st_alt == 200 else 0,
         "noticias": int(alt.get("cited_by_msm_count") or 0),
         "politicas": int(alt.get("cited_by_policies_count") or 0),
-        "ok": st_alt is not None and st_dim is not None,
+        "alt_ok": st_alt is not None,
+        "dim_ok": st_dim is not None,
     }
+    resultado["ok"] = resultado["alt_ok"] or resultado["dim_ok"]
     if resultado["ok"]:
         cache[doi] = resultado
     time.sleep(pausa)
@@ -63,6 +68,7 @@ def somar_impacto(docente: Docente, cache: dict, get=requests.get, pausa: float 
             continue
         r = buscar_impacto_doi(artigo.doi, cache, get=get, pausa=pausa)
         artigo.score, artigo.citacoes = float(r["score"]), r["citacoes"]
+        artigo.noticias, artigo.politicas = r["noticias"], r["politicas"]
         resultados.append(r)
     return Impacto(
         citacoes=sum(r["citacoes"] for r in resultados),
@@ -74,11 +80,14 @@ def somar_impacto(docente: Docente, cache: dict, get=requests.get, pausa: float 
 
 
 def somar_grupo(docentes: list[Docente]) -> Impacto:
-    impactos = [d.impacto for d in docentes if d.impacto]
+    unicos = {}
+    for d in docentes:
+        for a in d.artigos:
+            unicos.setdefault(chave_artigo(a), a)
     return Impacto(
-        citacoes=sum(i.citacoes for i in impactos),
-        altmetric_score=float(sum(i.altmetric_score for i in impactos)),
-        noticias=sum(i.noticias for i in impactos),
-        politicas=sum(i.politicas for i in impactos),
-        disponivel=any(i.disponivel for i in impactos),
+        citacoes=sum(a.citacoes for a in unicos.values()),
+        altmetric_score=float(sum(a.score for a in unicos.values())),
+        noticias=sum(a.noticias for a in unicos.values()),
+        politicas=sum(a.politicas for a in unicos.values()),
+        disponivel=any(d.impacto and d.impacto.disponivel for d in docentes),
     )

@@ -85,3 +85,12 @@ def test_foto_ou_iniciais(tmp_path):
 def test_static_copiado(tmp_path):
     render(tmp_path, Impacto(0, 0.0, 0, 0, False))
     assert (tmp_path / "static" / "style.css").exists() and (tmp_path / "static" / "app.js").exists()
+
+
+def test_artigo_coautorado_conta_uma_vez(tmp_path):
+    a = Docente("Ana Um", "ana-um", 1, [Artigo(2024, "Comum", "10.1/c", score=5.0)], None, None)
+    b = Docente("Bia Dois", "bia-dois", 1, [Artigo(2024, "Comum", "10.1/c", score=5.0)], None, None)
+    renderizar_site([a, b], Impacto(0, 5.0, 0, 0, True), tmp_path)
+    html = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert 'data-n="1">1</b><span>artigos 2021–2025' in html
+    assert html.count("Comum") == 1

@@ -8,6 +8,12 @@ class Artigo:
     doi: str | None
     score: float = 0.0
     citacoes: int = 0
+    noticias: int = 0
+    politicas: int = 0
+
+
+def chave_artigo(a: "Artigo") -> str:
+    return a.doi or a.titulo.casefold()
 
 
 @dataclass

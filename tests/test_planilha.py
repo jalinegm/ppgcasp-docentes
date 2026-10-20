@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ppgcasp.planilha import carregar_docentes, normalizar_doi, slugify, titulo_nome
+from ppgcasp.planilha import carregar_docentes, corrigir_texto, normalizar_doi, slugify, titulo_nome
 
 XLSX = Path(__file__).parent.parent / "dados" / "planilha.xlsx"
 
@@ -67,3 +67,27 @@ def test_linhas(docentes):
     por = {d.slug: d.linha for d in docentes}
     assert por["luana-mendes-dos-santos"] == 2
     assert por["jonas-sponchiado"] == 1
+
+
+def test_corrigir_texto_cp1252_e_escape():
+    assert corrigir_texto("PARÃ‚METROS HÃ_x008d_BRIDOS") == "PARÂMETROS HÍBRIDOS"
+    assert corrigir_texto("Educação Ambiental") == "Educação Ambiental"
+    assert corrigir_texto("cultivo mÃ­nimo") == "cultivo mínimo"
+
+
+def test_corrigir_texto_sequencias_mistas_e_maiusculas_legitimas():
+    assert corrigir_texto("submetida Ã inoculaÃ§Ã£o") == "submetida à inoculação"
+    assert corrigir_texto("REGIÃO NOROESTE GRÃOS") == "REGIÃO NOROESTE GRÃOS"
+    assert corrigir_texto("SÃ£o JoÃ£o") == "São João"
+
+
+def test_titulos_reais_sem_mojibake(docentes):
+    import re
+
+    ruins = [
+        a.titulo
+        for d in docentes
+        for a in d.artigos
+        if "_x00" in a.titulo or re.search(r"[ÃÂ][-¿Œ-™ ]", a.titulo)
+    ]
+    assert ruins == []

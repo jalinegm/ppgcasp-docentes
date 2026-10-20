@@ -24,7 +24,7 @@ def get_falso(alt, dim, chamadas=None):
 def test_altmetric_404_dimensions_200():
     get = get_falso(Resp(404), Resp(200, {"times_cited": 7}))
     r = buscar_impacto_doi("10.1/a", {}, get=get, pausa=0)
-    assert r == {"citacoes": 7, "score": 0, "noticias": 0, "politicas": 0, "ok": True}
+    assert r == {"citacoes": 7, "score": 0, "noticias": 0, "politicas": 0, "alt_ok": True, "dim_ok": True, "ok": True}
 
 
 def test_altmetric_campos():
@@ -68,11 +68,14 @@ def test_somar_impacto_sem_doi():
     assert somar_impacto(d, {}, get=None, pausa=0) == Impacto(0, 0.0, 0, 0, False)
 
 
-def test_somar_grupo():
-    a = Docente("A", "a", 1, impacto=Impacto(1, 2.0, 1, 0, True))
-    b = Docente("B", "b", 1, impacto=Impacto(2, 3.0, 0, 1, True))
+def test_somar_grupo_conta_artigo_coautorado_uma_vez():
+    comum1 = Artigo(2024, "Comum", "10.1/c", score=4.0, citacoes=2, noticias=1)
+    comum2 = Artigo(2024, "Comum", "10.1/c", score=4.0, citacoes=2, noticias=1)
+    so_b = Artigo(2024, "Só B", None, score=0.0, citacoes=0)
+    a = Docente("A", "a", 1, [comum1], impacto=Impacto(2, 4.0, 1, 0, True))
+    b = Docente("B", "b", 1, [comum2, so_b], impacto=Impacto(2, 4.0, 1, 0, True))
     c = Docente("C", "c", 1, impacto=None)
-    assert somar_grupo([a, b, c]) == Impacto(3, 5.0, 1, 1, True)
+    assert somar_grupo([a, b, c]) == Impacto(2, 4.0, 1, 0, True)
 
 
 def test_cache_roundtrip(tmp_path):
@@ -95,3 +98,18 @@ def test_altmetric_usa_chave_do_ambiente(monkeypatch):
     chamadas = []
     buscar_impacto_doi("10.1/a", {}, get=get_falso(Resp(404), Resp(404), chamadas), pausa=0)
     assert any("altmetric" in u and "key=abc123" in u for u in chamadas)
+
+
+def test_resultado_parcial_vai_para_cache_e_reconsulta_com_chave(monkeypatch):
+    monkeypatch.delenv("ALTMETRIC_API_KEY", raising=False)
+    cache = {}
+    chamadas = []
+    get = get_falso(Resp(403), Resp(200, {"times_cited": 6}), chamadas)
+    r = buscar_impacto_doi("10.1/a", cache, get=get, pausa=0)
+    assert r["citacoes"] == 6 and "10.1/a" in cache
+    n = len(chamadas)
+    buscar_impacto_doi("10.1/a", cache, get=get, pausa=0)
+    assert len(chamadas) == n  # sem chave: não insiste no Altmetric
+    monkeypatch.setenv("ALTMETRIC_API_KEY", "k")
+    buscar_impacto_doi("10.1/a", cache, get=get, pausa=0)
+    assert len(chamadas) > n  # com chave: reconsulta o Altmetric

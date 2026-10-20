@@ -5,7 +5,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .lattes import CATEGORIAS
-from .models import Docente, Impacto
+from .models import Docente, Impacto, chave_artigo
 
 BASE = Path(__file__).parent
 STATIC = BASE.parent / "static"
@@ -49,7 +49,11 @@ def renderizar_site(docentes: list[Docente], grupo: Impacto, saida: Path, fotos:
         (LINHAS[n], sorted((d for d in docentes if d.linha == n), key=lambda d: d.nome))
         for n in sorted(LINHAS)
     ]
-    todos_artigos = [(d, a) for d in docentes for a in d.artigos]
+    unicos: dict = {}
+    for d in docentes:
+        for a in d.artigos:
+            unicos.setdefault(chave_artigo(a), (d, a))
+    todos_artigos = list(unicos.values())
     destaques = sorted((p for p in todos_artigos if p[1].score > 0), key=lambda p: -p[1].score)[:3]
     kpis = {
         "docentes": len(docentes),
